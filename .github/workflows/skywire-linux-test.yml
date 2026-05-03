@@ -1,19 +1,19 @@
-name: Skywire Linux Test (Reusable)
+name: Skywire Linux Test
+run-name: "Skywire Linux Test - ${{ github.event.client_payload.dispatch_id }}"
 
 on:
-  workflow_call:
-    secrets:
-      DOCKER_USERNAME:
-        required: true
-      DOCKER_PASSWORD:
-        required: true
+  repository_dispatch:
+    types: [skywire-linux-test]
 
 jobs:
   linux:
     runs-on: self-hosted
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
         with:
+          repository: ${{ github.event.client_payload.repository }}
+          ref: refs/pull/${{ github.event.client_payload.pr_number }}/merge
           fetch-depth: 0
           fetch-tags: true
 
@@ -46,7 +46,7 @@ jobs:
           make e2e-run
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Test E2E
         run: make e2e-test
